@@ -5,6 +5,7 @@ from agno.agent import Agent
 from agno.db.in_memory import InMemoryDb
 from agno.models.openai.like import OpenAILike
 from agno.os import AgentOS
+from agno.os.interfaces.telegram import Telegram
 
 from tools import get_current_time, get_weather
 
@@ -42,7 +43,14 @@ agent = Agent(
     markdown=True,
 )
 
-agent_os = AgentOS(agents=[agent], telemetry=False)
+# Telegram is webhook-only in Agno: needs a public HTTPS URL (see scripts/telegram_webhook.sh).
+# Never set APP_ENV=development: it disables the webhook secret check.
+interfaces = []
+telegram_token = os.environ.get("TELEGRAM_BOT_TOKEN_AGNO")
+if telegram_token:
+    interfaces.append(Telegram(agent=agent, token=telegram_token))
+
+agent_os = AgentOS(agents=[agent], interfaces=interfaces, telemetry=False)
 app = agent_os.get_app()
 
 if __name__ == "__main__":
