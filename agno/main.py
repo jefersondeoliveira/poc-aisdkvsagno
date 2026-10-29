@@ -26,6 +26,12 @@ key = os.environ["FAL_KEY"]
 # FAL expects "Authorization: Key <key>"; Ollama (fallback) expects Bearer.
 auth = "Bearer ollama" if key == "ollama" else f"Key {key}"
 
+# Experiment switches (defaults keep the original behavior):
+#   AGENT_PROMPT_FILE: alternative system prompt file
+#   AGNO_MEMORY: "auto" (extract user memories after every run) | "agentic" (model decides via tool)
+memory_mode = os.environ.get("AGNO_MEMORY", "")
+prompt_file = Path(os.environ.get("AGENT_PROMPT_FILE", ROOT / "shared" / "system-prompt.txt"))
+
 agent = Agent(
     id="chat-agent",
     name="Chat Agent",
@@ -35,11 +41,14 @@ agent = Agent(
         api_key=key,
         default_headers={"Authorization": auth},
     ),
-    instructions=(ROOT / "shared" / "system-prompt.txt").read_text(),
+    instructions=prompt_file.read_text(),
     tools=[get_weather, get_current_time],
     db=SqliteDb(db_file=str(Path(__file__).resolve().parent / "data" / "agent.db")),
     add_history_to_context=True,
     num_history_runs=5,
+    update_memory_on_run=memory_mode == "auto",
+    enable_agentic_memory=memory_mode == "agentic",
+    add_memories_to_context=bool(memory_mode),
     markdown=True,
 )
 

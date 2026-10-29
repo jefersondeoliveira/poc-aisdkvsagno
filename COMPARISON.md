@@ -70,12 +70,34 @@ Question: does one persistent Agno session carry context between voice turns and
 Reading: the fact was present in the history sent to the model in the cases inspected, and the failures also happen with plain text. So context sharing and persistence work as designed, and what is unreliable is the model's recall (`google/gemini-2.5-flash` through FAL, with this system prompt). It is not specific to voice. Sample sizes are tiny (3 per path), so no rates should be quoted. A first test also failed for a wording reason: "guarde isso" made the model state it cannot store information, and that refusal stayed in the history and was repeated.
 
 What this means for a complex agent with voice:
-- **Recall cannot rely on raw history with this model and prompt.** Before building more, test a stronger model and Agno's memory features (user memories, agentic memory), which were not tried here.
+- **Recall cannot rely on raw history with this model and prompt.** Follow-up below tests stronger models and Agno's memory.
 - **Latency is a blocker for conversational voice in this form.** Per turn: transcription 10 to 14 s, Agno about 1.1 s, speech 3.6 to 4.4 s. A turn-based pipeline is fine for voice notes, not for a live conversation; that needs a realtime provider.
 - **FAL `wizper` fails with `@ai-sdk/fal`**: HTTP 422, the provider sends `chunk_level: "word"` and wizper accepts only `segment`. `whisper` works.
 - **One identity across channels is something you must design.** Here both channels use the same `session_id` on purpose. Whether Telegram and other Agno interfaces map the same person to that id was not verified.
 
 Not done: realtime voice (phase 2), a real microphone, concurrent users, a stronger model, Agno memory features.
+
+### Follow-up: making recall reliable
+
+Script: `scripts/recall_eval.py`. Per trial it uses a fresh user, states a fact (a pet name), then asks for it in the **same session** (tests history) and in a **new session of the same user** (tests memory). Agno switches added to `agno/main.py` for the experiment: `AGNO_MEMORY=auto|agentic`, `AGENT_PROMPT_FILE`; `FAL_MODEL` selects the model. Defaults are unchanged.
+
+| Configuration | Same session | New session, same user |
+|---|---|---|
+| gemini-2.5-flash, history only | 15/16 (5/6, then 10/10) | 0/16 |
+| gemini-2.5-flash, neutral system prompt | 3/6 | 0/6 |
+| gemini-2.5-flash + memory `auto` (extract after every run) | 6/6 | 6/6 |
+| gemini-2.5-flash + memory `agentic` (model saves via tool) | 16/16 (6/6, then 10/10) | 16/16 |
+| claude-sonnet-4.5, history only | 6/6 | 0/6 |
+| gpt-4.1, history only | 6/6 | 0/6 |
+
+What it says:
+- **History is per session.** Without memory, a new session of the same user recalls nothing, whatever the model. If voice and text ever land in different sessions, history will not carry the context.
+- **Agno's user memory is keyed by `user_id`, not by session.** Both memory modes recalled across sessions. Design for one stable `user_id` per person across channels; that is the part to get right.
+- **Memory also stabilized the weak model inside one session** (22/22 across its three memory runs), and the stronger models handled same-session recall with history alone (12/12).
+- **The earlier flakiness belongs to gemini-2.5-flash.** It is not a property of the voice path or of the prompt: the neutral prompt did not help (3/6, noise included).
+- **Memory costs time and tokens.** For 10 trials of 3 calls each, `agentic` took 52 s against 23 s for history only, because memory is read and written through extra model calls.
+
+Caveats: 6 to 16 trials per row, so these are indications and not rates; one easy fact type (a pet name); no multiple or contradicting facts, long conversations, or memory about voice-specific content. The first `auto` run returned "Provider returned error" on all 6 trials; it did not reproduce on a rerun (6/6 with no errors) and its cause was not found.
 
 ## When to pick which
 
