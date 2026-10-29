@@ -11,6 +11,12 @@ bash scripts/smoke_fal.sh  # expect: status 200, stream chunks, tool_calls: yes
 
 Fallback to local Ollama: set `FAL_BASE_URL=http://localhost:11434/v1`, `FAL_MODEL=qwen2.5:7b`, `FAL_KEY=ollama`.
 
+## Run both at once
+
+```bash
+bash scripts/dev.sh   # AI SDK on :3000, Agno on :7777; installs deps on first run; Ctrl+C stops both
+```
+
 ## AI SDK (Next.js, TypeScript)
 
 ```bash
