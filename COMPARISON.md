@@ -101,12 +101,20 @@ Viewed in a browser (`/compare`): both sides also returned an intermittent "Prov
 
 Caveats: 6 to 16 trials per row, so these are indications and not rates; one easy fact type (a pet name); no multiple or contradicting facts, long conversations, or memory about voice-specific content. The first `auto` run returned "Provider returned error" on all 6 trials; it did not reproduce on a rerun (6/6 with no errors) and its cause was not found.
 
-## When to pick which
+## Verdict and when to pick which
 
-- Product with its own web UI, TypeScript stack, wanting fine control of streaming and rendering: **AI SDK**.
-- Agent backend (tools, memory, knowledge, multi-agent, an API that any frontend or service can call), Python stack: **Agno**.
-- They are complementary more than competing: an Agno AgentOS API could sit behind an AI SDK frontend (adapter needed, not built here, see spec "Out of scope").
+For the stated goal (a complex agent, many channels, text and voice sharing context): **use both, in distinct roles.**
+- **Agno as the agent core**: tools, session history and user memory keyed by `user_id`, persistent in a database, channel interfaces on the same server.
+- **AI SDK at the edge**: web UI and voice, calling the Agno API. A small version of this already runs: `/api/voice` and `/api/compare` in the Next app call Agno.
+
+When one is enough:
+- A simple chat on a website, TypeScript stack: **AI SDK alone**.
+- An agent backend in Python with no UI of its own, or only chat-app channels: **Agno alone**.
+
+The combination pays off only because of the combination of requirements (complex agent + several channels + voice). If any of them goes away, a single tool is simpler.
+
+Not proven, so the verdict is a reasoned recommendation and not a measured one: realtime voice with shared context, one `user_id` across different channels, Slack and WhatsApp, Agno's own chat UI, and an agent that is truly complex (several facts, knowledge, teams).
 
 ## Limits of this comparison
 
-One model, one small scenario, one run environment. Agno's hosted UI and AI SDK's browser rendering were not exercised by a browser; both were verified through their HTTP APIs. RAG, multi-agent and persistence were out of scope.
+One model family (`google/gemini-2.5-flash` through FAL, plus two stronger models in one experiment), small scenarios, one machine. Samples are 3 to 16 trials, so numbers are indications. The Next pages (`/`, `/compare`, `/docs`) were opened in a browser; the Telegram bots were exercised by the user in the Telegram app. The `/voice` page and real microphone input were not exercised. RAG, multi-agent, multiple concurrent users and deployment were out of scope.

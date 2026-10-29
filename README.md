@@ -17,7 +17,7 @@ Fallback to local Ollama: set `FAL_BASE_URL=http://localhost:11434/v1`, `FAL_MOD
 bash scripts/dev.sh   # AI SDK on :3000, Agno on :7777; installs deps on first run; Ctrl+C stops both
 ```
 
-After `scripts/dev.sh`, open:
+After `scripts/dev.sh`, open `http://localhost:3000` (the home: verdict, architecture, differences, links) and then:
 - `http://localhost:3000/compare`: **same prompt to both agents side by side** (answer, tools used, time). "New session (same user)" shows the memory difference. Agno runs with `AGNO_MEMORY=agentic` here.
 - `http://localhost:3000`: AI SDK chat. `http://localhost:3000/voice`: voice and text on one Agno session (not yet exercised with a real microphone).
 
