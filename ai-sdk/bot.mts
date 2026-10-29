@@ -32,14 +32,19 @@ const bot = new Chat({
 });
 
 bot.onDirectMessage(async (thread, message) => {
+  console.log(`[bot] DM received (${message.text?.length ?? 0} chars)`);
   if (!message.text?.trim()) return;
+  const started = Date.now();
   try {
     const { messages } = await bot.history.thread.list(thread.id, { limit: 20 });
     const result = await agent.stream({
       messages: await toAiMessages(messages),
       abortSignal: thread.signal,
+      onStepFinish: (step) =>
+        console.log(`[bot] step: tools=[${step.toolCalls.map((c) => c.toolName)}]`),
     });
     await thread.post(result.fullStream);
+    console.log(`[bot] replied in ${Date.now() - started} ms`);
   } catch (error) {
     console.error("[bot] turn failed:", error);
     await thread.post(

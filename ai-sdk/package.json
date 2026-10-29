@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "bot": "tsx bot.ts"
+    "bot": "tsx bot.mts"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^3.0.80",

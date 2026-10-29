@@ -32,6 +32,26 @@ Latency is dominated by the model and the second LLM step, so it says little abo
 - Smaller footprint for the same backend behavior, but the default error for a bad key is less informative.
 - Docs are not bundled with the package; APIs were checked by introspection.
 
+## Multi-channel (Telegram)
+
+Goal: the same agent behind a website chat and chat apps. Telegram was the channel tested.
+
+| | AI SDK (Chat SDK) | Agno (AgentOS interface) |
+|---|---|---|
+| Code to add the channel | `bot.mts`, 57 lines, plus `lib/agent.ts` shared with the web route | 4 lines in `main.py` (`Telegram(agent=agent, token=…)`), plus a webhook registration script |
+| Receiving messages | Long polling: **no public URL needed** | Webhook only: **needs a public HTTPS URL** (tunnel) and an explicit `setWebhook` call with a secret token |
+| Extra packages | `chat`, `@chat-adapter/telegram`, `@chat-adapter/state-memory` | `agno[telegram]` |
+| State | Separate adapter (memory for dev; Redis/Postgres for production) | Agent's own session db |
+| Process model | Separate long-running process (not a Next route) in polling mode | Same server as the API |
+| Tested live on Telegram | **Yes**: 4 prompts of the test script answered correctly (reported by the user; not independently observed by me) | **No**: opening the public tunnel was not permitted in this session |
+
+What this says for the "many channels" goal:
+- Local development is easier on the AI SDK side because polling needs no tunnel. Agno needs one even to try the channel.
+- Agno attaches channels to the same server that exposes the API, so one deployment serves web, REST and Telegram. The AI SDK splits into the Next app plus a bot process (or webhooks on serverless).
+- Chat SDK lists more platforms (Teams, Discord, Google Chat, among others) than Agno's built-in interfaces (WhatsApp, Slack, Telegram, plus A2A and AG-UI). Not verified beyond the docs and source.
+- Exposing a local Agno server through a tunnel also exposes its other routes; protect them before doing it.
+- Not measured: how the reply is delivered in Telegram (gradual vs. all at once), and whether the follow-up used history beyond the user's report that all answers were correct.
+
 ## When to pick which
 
 - Product with its own web UI, TypeScript stack, wanting fine control of streaming and rendering: **AI SDK**.
