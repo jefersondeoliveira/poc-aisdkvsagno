@@ -97,6 +97,8 @@ What it says:
 - **The earlier flakiness belongs to gemini-2.5-flash.** It is not a property of the voice path or of the prompt: the neutral prompt did not help (3/6, noise included).
 - **Memory costs time and tokens.** For 10 trials of 3 calls each, `agentic` took 52 s against 23 s for history only, because memory is read and written through extra model calls.
 
+Viewed in a browser (`/compare`): both sides also returned an intermittent "Provider returned error" on some turns (a flash-through-FAL issue, not tied to a framework); Agno still saved the memory in one such turn and recalled it in a new session.
+
 Caveats: 6 to 16 trials per row, so these are indications and not rates; one easy fact type (a pet name); no multiple or contradicting facts, long conversations, or memory about voice-specific content. The first `auto` run returned "Provider returned error" on all 6 trials; it did not reproduce on a rerun (6/6 with no errors) and its cause was not found.
 
 ## When to pick which
