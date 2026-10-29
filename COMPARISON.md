@@ -55,6 +55,28 @@ What this says for the "many channels" goal:
 - Visibility of what the agent did differs by default: Agno shows tool calls in Telegram, the AI SDK bot shows only the answer. Whether that is a plus (transparency) or noise depends on the product; with Chat SDK, showing tools would mean writing it yourself.
 - Not measured: how the reply is delivered in Telegram (gradual vs. all at once) and whether prompt 4 used history, beyond the user's report that the AI SDK answers were correct. The Agno restriction by user id (`TELEGRAM_ALLOWED_USER_IDS`) was not checked: its interface exposes no such parameter, so that bot is open to anyone who finds the username while the webhook is registered.
 
+## Spike: shared context between voice and text
+
+Question: does one persistent Agno session carry context between voice turns and text turns, in both directions? Setup: Agno with `SqliteDb` (`agno/data/agent.db`, git-ignored), one `session_id` per user; text goes straight to the Agno API; voice goes through the Next route `/api/voice` (FAL `whisper` transcription, Agno run, FAL `minimax/speech-02-turbo` speech). Voice here is turn-based, not realtime. Audio inputs were synthesized speech sent to the route, not a real microphone (the `/voice` page with hold-to-talk was written but not exercised in a browser).
+
+| Check | Result |
+|---|---|
+| Session survives an Agno restart | **Pass** (history reloaded from SQLite; confirmed in the messages sent to the model) |
+| Voice states a fact, text recalls it | **Pass**, also after a restart |
+| Text states a fact, voice recalls it | **Mixed**: failed twice at first, then 1 of 3 in a controlled rerun |
+| Control: text states, text recalls (same API, no voice) | 2 of 3 |
+| Typed text through the voice route | 2 of 3 |
+
+Reading: the fact was present in the history sent to the model in the cases inspected, and the failures also happen with plain text. So context sharing and persistence work as designed, and what is unreliable is the model's recall (`google/gemini-2.5-flash` through FAL, with this system prompt). It is not specific to voice. Sample sizes are tiny (3 per path), so no rates should be quoted. A first test also failed for a wording reason: "guarde isso" made the model state it cannot store information, and that refusal stayed in the history and was repeated.
+
+What this means for a complex agent with voice:
+- **Recall cannot rely on raw history with this model and prompt.** Before building more, test a stronger model and Agno's memory features (user memories, agentic memory), which were not tried here.
+- **Latency is a blocker for conversational voice in this form.** Per turn: transcription 10 to 14 s, Agno about 1.1 s, speech 3.6 to 4.4 s. A turn-based pipeline is fine for voice notes, not for a live conversation; that needs a realtime provider.
+- **FAL `wizper` fails with `@ai-sdk/fal`**: HTTP 422, the provider sends `chunk_level: "word"` and wizper accepts only `segment`. `whisper` works.
+- **One identity across channels is something you must design.** Here both channels use the same `session_id` on purpose. Whether Telegram and other Agno interfaces map the same person to that id was not verified.
+
+Not done: realtime voice (phase 2), a real microphone, concurrent users, a stronger model, Agno memory features.
+
 ## When to pick which
 
 - Product with its own web UI, TypeScript stack, wanting fine control of streaming and rendering: **AI SDK**.

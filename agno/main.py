@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 from agno.agent import Agent
-from agno.db.in_memory import InMemoryDb
+from agno.db.sqlite import SqliteDb
 from agno.models.openai.like import OpenAILike
 from agno.os import AgentOS
 from agno.os.interfaces.telegram import Telegram
@@ -37,7 +37,7 @@ agent = Agent(
     ),
     instructions=(ROOT / "shared" / "system-prompt.txt").read_text(),
     tools=[get_weather, get_current_time],
-    db=InMemoryDb(),
+    db=SqliteDb(db_file=str(Path(__file__).resolve().parent / "data" / "agent.db")),
     add_history_to_context=True,
     num_history_runs=5,
     markdown=True,

@@ -11,6 +11,7 @@
     "bot": "tsx bot.mts"
   },
   "dependencies": {
+    "@ai-sdk/fal": "^3.0.71",
     "@ai-sdk/openai-compatible": "^3.0.80",
     "@ai-sdk/react": "^4.0.160",
     "@chat-adapter/state-memory": "^4.43.0",
