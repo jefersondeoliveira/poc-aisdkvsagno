@@ -1,69 +1,53 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
 
-export default function Home() {
+import { useChat } from "@ai-sdk/react";
+import { useState } from "react";
+
+export default function Chat() {
+  const [input, setInput] = useState("");
+  const { messages, sendMessage, status, error } = useChat();
+  const busy = status === "submitted" || status === "streaming";
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main style={{ maxWidth: 640, margin: "0 auto", padding: "32px 16px", fontFamily: "system-ui" }}>
+      <h1>AI SDK chat</h1>
+      {messages.map((message) => (
+        <div key={message.id} style={{ margin: "12px 0", whiteSpace: "pre-wrap" }}>
+          <strong>{message.role === "user" ? "You" : "AI"}:</strong>
+          {message.parts.map((part, i) => {
+            const key = `${message.id}-${i}`;
+            if (part.type === "text") return <div key={key}>{part.text}</div>;
+            if (part.type.startsWith("tool-")) {
+              const p = part as { type: string; state: string; input?: unknown; output?: unknown };
+              return (
+                <pre key={key} style={{ background: "#eee", padding: 8, fontSize: 12 }}>
+                  {p.type.slice(5)}({JSON.stringify(p.input)}) [{p.state}]
+                  {p.output !== undefined ? ` → ${JSON.stringify(p.output)}` : ""}
+                </pre>
+              );
+            }
+            return null;
+          })}
+        </div>
+      ))}
+      {error && <p role="alert" style={{ color: "crimson" }}>Error: {error.message}</p>}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!input.trim()) return;
+          sendMessage({ text: input });
+          setInput("");
+        }}
+        style={{ display: "flex", gap: 8, marginTop: 24 }}
+      >
+        <input
+          value={input}
+          onChange={(e) => setInput(e.currentTarget.value)}
+          placeholder="Say something..."
+          style={{ flex: 1, padding: 8 }}
         />
-        <div className={styles.intro}>
-          <h1>
-            To get started, edit the{" "}
-            <code className={styles.code}>page.tsx</code> file.
-          </h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+        <button type="submit" disabled={busy || !input.trim()}>Send</button>
+      </form>
+    </main>
   );
 }
