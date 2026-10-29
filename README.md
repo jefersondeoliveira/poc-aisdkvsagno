@@ -1,0 +1,35 @@
+# POC: Vercel AI SDK vs Agno
+
+Same streaming chat agent (tools `get_weather`, `get_current_time`) built in both frameworks, same model through FAL. Results: [COMPARISON.md](COMPARISON.md). Design and plan: `docs/superpowers/`.
+
+## Setup
+
+```bash
+cp .env.example .env     # then set FAL_KEY (never commit .env)
+bash scripts/smoke_fal.sh  # expect: status 200, stream chunks, tool_calls: yes
+```
+
+Fallback to local Ollama: set `FAL_BASE_URL=http://localhost:11434/v1`, `FAL_MODEL=qwen2.5:7b`, `FAL_KEY=ollama`.
+
+## AI SDK (Next.js, TypeScript)
+
+```bash
+cd ai-sdk && npm install
+npm run dev        # http://localhost:3000
+npm test           # tool unit tests
+```
+
+## Agno (Python, AgentOS)
+
+```bash
+cd agno && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+.venv/bin/python main.py     # AgentOS API on http://localhost:7777
+.venv/bin/pytest -q          # tool unit tests
+```
+
+Try it: `curl -N -X POST localhost:7777/agents/chat-agent/runs -F "message=Clima em Lisboa?" -F stream=true`.
+The Agno UI (os.agno.com) can connect to the local AgentOS endpoint; it needs an Agno account and was not exercised here.
+
+## Test script
+
+`shared/test-script.md`, identical for both.
