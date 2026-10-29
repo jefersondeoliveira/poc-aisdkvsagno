@@ -12,6 +12,8 @@ Para um agente **complexo**, em **vários canais** (site, Telegram, WhatsApp, Sl
 - **Agno** como núcleo do agente: tools, sessão persistente, memória por `user_id`, interfaces de canal.
 - **AI SDK** na ponta web e de voz, chamando o Agno por API.
 
+**Se o seu critério for controle e baixo acoplamento**, a alternativa é o **AI SDK como núcleo, com uma camada de memória sua** (por exemplo Postgres e vetores, por `user_id`). Ganha-se liberdade; paga-se construindo memória, identidade entre canais e persistência: sem memória, a lembrança em sessão nova foi 0/16, contra 16/16 no Agno. Não foi testado construir essa camada, nem usar o Agno só como biblioteca (sem AgentOS).
+
 Para um chat simples só no site, o AI SDK sozinho basta. Para um backend de agentes em Python sem interface própria, o Agno sozinho basta. Os números, as tabelas e as ressalvas estão em [COMPARISON.md](COMPARISON.md). Tudo isso também está na home do app (`/`), com os diagramas de arquitetura.
 
 > A recomendação é raciocinada, não totalmente medida. **Não foi provado:** voz em tempo real, o mesmo `user_id` entre canais diferentes, Slack, WhatsApp, a UI do Agno e um agente realmente complexo. Amostras pequenas (6 a 16 tentativas).

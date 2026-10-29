@@ -29,6 +29,7 @@ const unproven = [
   "Voz em tempo real (realtime) com contexto compartilhado: só testei voz em turnos, com áudio sintético.",
   "Mesmo user_id entre canais diferentes (site, Telegram, WhatsApp): usei o mesmo id de propósito; não verifiquei como os canais do Agno mapeiam a pessoa.",
   "Slack e WhatsApp (nenhum dos dois), a UI do Agno (Agent UI) e um agente realmente complexo (vários fatos, conhecimento, times).",
+  "Construir a memória própria sobre o AI SDK (a alternativa de mais controle) e usar o Agno só como biblioteca, sem AgentOS.",
   "Amostras pequenas (6 a 16 tentativas): são indicações, não taxas.",
 ];
 
@@ -164,6 +165,12 @@ export default function Home() {
           Quando <em>não</em> usar os dois: chat simples só no site, ou o AI SDK sozinho já basta; backend de agentes em
           Python sem interface própria, ou o Agno sozinho basta. Juntar os dois só compensa pela combinação de agente
           complexo + vários canais + voz.
+        </p>
+        <p className="muted">
+          <strong style={{ color: "var(--fg)" }}>Se controle e baixo acoplamento pesam mais:</strong> a alternativa é o
+          AI SDK como núcleo, com uma camada de memória sua (por exemplo Postgres e vetores, por <code>user_id</code>).
+          Você ganha liberdade e paga construindo memória, identidade entre canais e persistência: sem memória, a
+          lembrança em sessão nova foi 0/16, contra 16/16 no Agno. Raciocinado, não testado.
         </p>
       </section>
 

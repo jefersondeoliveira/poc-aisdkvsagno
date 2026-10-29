@@ -131,6 +131,16 @@ When one is enough:
 
 The combination pays off only because of the combination of requirements (complex agent + several channels + voice). If any of them goes away, a single tool is simpler.
 
+### If control and low coupling matter more than built-in memory
+
+The verdict above leans on Agno's built-in memory. If the priority is to own the architecture, the alternative is the **AI SDK as the core, with a memory layer you build** (for example Postgres plus a vector store, keyed by one stable `user_id`).
+
+In favor, from what the POC showed: Agno's AgentOS bundles API, auth, sessions, channel interfaces and storage; its memory lives in its own schema (16 `agno_*` tables in SQLite); its Telegram interface exposes no per-user filter; telemetry is on by default; and a clean install needed extras that are not obvious (`sqlalchemy[asyncio]`, `PyJWT`, `python-multipart`). The AI SDK is a library: you write the route, the loop and the state.
+
+The cost, also measured: without memory, a new session of the same user recalled nothing (0/16, against 16/16 with Agno's memory), history is per session, and identity across channels, persistence and the channel bots are yours to build and maintain.
+
+Not tested: building that memory layer on the AI SDK, or using Agno as a library (`Agent` without AgentOS), which may reduce the coupling. This alternative is a reasoned option, not a measured one.
+
 Not proven, so the verdict is a reasoned recommendation and not a measured one: realtime voice with shared context, one `user_id` across different channels, Slack and WhatsApp, Agno's own chat UI, and an agent that is truly complex (several facts, knowledge, teams).
 
 ## Limits of this comparison
