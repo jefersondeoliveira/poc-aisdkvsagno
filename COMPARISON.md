@@ -101,6 +101,24 @@ Viewed in a browser (`/compare`): both sides also returned an intermittent "Prov
 
 Caveats: 6 to 16 trials per row, so these are indications and not rates; one easy fact type (a pet name); no multiple or contradicting facts, long conversations, or memory about voice-specific content. The first `auto` run returned "Provider returned error" on all 6 trials; it did not reproduce on a rerun (6/6 with no errors) and its cause was not found.
 
+## Target architecture
+
+Solid = validated in this POC. `(proposed)` = not tested.
+
+```
+CHANNELS                  EDGE AND IDENTITY            AGENT CORE                  DATA AND SERVICES
+Site (chat) ------------> AI SDK (Next.js)  ---------> Agno (AgentOS)  ---------> Postgres (proposed; POC used SQLite)
+Realtime voice (proposed)   web UI and voice             agents and teams  ------> Vector store for RAG (proposed)
+                            calls the Agno API           tools             ------> Model gateway (FAL / OpenRouter)
+Telegram -----+                                          memory by user_id ------> STT and TTS (FAL, turn-based)
+WhatsApp (p)  +--------> Identity (proposed) ---------->  persistent sessions ---> Realtime voice provider (proposed)
+Slack (p) ----+           person -> one stable user_id    channel interfaces
+                                                         protected API
+Cross-cutting (proposed): real auth (JWT/SSO instead of a key), observability and cost per user, rate limits.
+```
+
+The same diagrams are on the home page (`/`).
+
 ## Verdict and when to pick which
 
 For the stated goal (a complex agent, many channels, text and voice sharing context): **use both, in distinct roles.**

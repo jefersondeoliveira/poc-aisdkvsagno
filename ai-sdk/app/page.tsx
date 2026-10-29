@@ -70,6 +70,79 @@ function Diagram() {
   );
 }
 
+
+function Box({ x, y, w, h, title, sub, dashed, accent }: { x: number; y: number; w: number; h: number; title: string; sub?: string; dashed?: boolean; accent?: boolean }) {
+  return (
+    <g>
+      <rect className={`${accent ? "dg-box-a" : "dg-box"}${dashed ? " dg-dash" : ""}`} x={x} y={y} width={w} height={h} rx="10" />
+      <text className="dg-text" x={x + w / 2} y={y + (sub ? h / 2 - 3 : h / 2 + 5)} textAnchor="middle">{title}</text>
+      {sub && <text className="dg-sub" x={x + w / 2} y={y + h / 2 + 15} textAnchor="middle">{sub}</text>}
+    </g>
+  );
+}
+
+function IdealDiagram() {
+  return (
+    <svg className="diagram" viewBox="0 0 960 430" role="img" aria-label="Arquitetura ideal: canais, camada de identidade, AI SDK na borda, Agno como núcleo, dados e serviços de modelo e voz">
+      <defs>
+        <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0 0L10 5L0 10z" className="dg-head" />
+        </marker>
+      </defs>
+      <text className="dg-sub" x="10" y="14">CANAIS</text>
+      <text className="dg-sub" x="255" y="14">BORDA E IDENTIDADE</text>
+      <text className="dg-sub" x="545" y="14">NÚCLEO DO AGENTE</text>
+      <text className="dg-sub" x="815" y="14">DADOS E SERVIÇOS</text>
+
+      <Box x={10} y={24} w={190} h={46} title="Site (chat)" />
+      <Box x={10} y={80} w={190} h={46} title="Voz em tempo real" dashed />
+      <Box x={10} y={150} w={190} h={46} title="Telegram" />
+      <Box x={10} y={206} w={190} h={46} title="WhatsApp" dashed />
+      <Box x={10} y={262} w={190} h={46} title="Slack" dashed />
+
+      <Box x={255} y={24} w={230} h={102} title="AI SDK (Next.js)" sub="UI web e voz · chama o Agno por API" accent />
+      <Box x={255} y={178} w={230} h={96} title="Identidade" sub="pessoa → um user_id estável" dashed />
+
+      <rect className="dg-box-a" x="545" y="24" width="235" height="284" rx="10" />
+      <text className="dg-text" x="662" y="52" textAnchor="middle">Agno (AgentOS)</text>
+      <text className="dg-sub" x="662" y="82" textAnchor="middle">agentes e times</text>
+      <text className="dg-sub" x="662" y="104" textAnchor="middle">tools</text>
+      <text className="dg-sub" x="662" y="126" textAnchor="middle">memória por user_id</text>
+      <text className="dg-sub" x="662" y="148" textAnchor="middle">sessão persistente</text>
+      <text className="dg-sub" x="662" y="170" textAnchor="middle">conhecimento (RAG)</text>
+      <text className="dg-sub" x="662" y="192" textAnchor="middle">interfaces de canal</text>
+      <text className="dg-sub" x="662" y="214" textAnchor="middle">API protegida</text>
+
+      <Box x={815} y={24} w={140} h={46} title="Postgres" sub="sessões e memória" dashed />
+      <Box x={815} y={80} w={140} h={46} title="Vetores" sub="conhecimento (RAG)" dashed />
+      <Box x={815} y={136} w={140} h={46} title="Gateway de modelos" sub="FAL / OpenRouter" />
+      <Box x={815} y={192} w={140} h={46} title="STT e TTS" sub="FAL (turnos)" />
+      <Box x={815} y={248} w={140} h={46} title="Provedor realtime" sub="voz ao vivo" dashed />
+
+      <path className="dg-line" d="M200 47 L253 62" markerEnd="url(#ah2)" />
+      <path className="dg-line" d="M200 103 L253 92" markerEnd="url(#ah2)" />
+      <path className="dg-line" d="M485 75 L543 75" markerEnd="url(#ah2)" />
+      <path className="dg-line" d="M200 173 L253 215" markerEnd="url(#ah2)" />
+      <path className="dg-line" d="M200 229 L253 226" markerEnd="url(#ah2)" />
+      <path className="dg-line" d="M200 285 L253 240" markerEnd="url(#ah2)" />
+      <path className="dg-line" d="M485 226 L543 226" markerEnd="url(#ah2)" />
+      <path className="dg-line" d="M780 47 L813 47" markerEnd="url(#ah2)" />
+      <path className="dg-line" d="M780 103 L813 103" markerEnd="url(#ah2)" />
+      <path className="dg-line" d="M780 159 L813 159" markerEnd="url(#ah2)" />
+      <path className="dg-line" d="M780 215 L813 215" markerEnd="url(#ah2)" />
+      <path className="dg-line dg-dash" d="M780 271 L813 271" markerEnd="url(#ah2)" />
+
+      <rect className="dg-box dg-dash" x="10" y="334" width="945" height="40" rx="10" />
+      <text className="dg-text" x="482" y="359" textAnchor="middle">Transversal: autenticação (hoje: chave) → JWT/SSO · observabilidade e custo por usuário · limites de uso</text>
+
+      <rect className="dg-box" x="10" y="392" width="34" height="18" rx="4" />
+      <text className="dg-sub" x="52" y="405">validado na POC</text>
+      <rect className="dg-box dg-dash" x="190" y="392" width="34" height="18" rx="4" />
+      <text className="dg-sub" x="232" y="405">proposto, não testado</text>
+    </svg>
+  );
+}
+
 export default function Home() {
   return (
     <main className="wrap">
@@ -94,8 +167,15 @@ export default function Home() {
         </p>
       </section>
 
-      <h2>Arquitetura sugerida</h2>
+      <h2>Arquitetura da POC (o que foi validado)</h2>
       <div className="card"><Diagram /></div>
+
+      <h2>Arquitetura ideal (alvo)</h2>
+      <p className="muted" style={{ marginTop: 0 }}>
+        Linha cheia: foi testado na POC. Tracejado: proposta, ainda não testada (identidade única entre canais, voz em
+        tempo real, Postgres no lugar do SQLite, RAG, WhatsApp e Slack, autenticação real).
+      </p>
+      <div className="card"><IdealDiagram /></div>
 
       <h2>Quem faz melhor o quê</h2>
       <div className="card tablewrap">

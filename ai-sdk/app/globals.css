@@ -83,3 +83,4 @@ th { color: var(--muted); font-weight: 600; white-space: nowrap; }
 .prose li { margin: 4px 0; }
 .prose table { display: block; overflow-x: auto; }
 .prose pre { background: var(--card); padding: 12px; border-radius: 8px; overflow-x: auto; }
+.dg-dash { stroke-dasharray: 6 4; }
